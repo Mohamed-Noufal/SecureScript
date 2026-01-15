@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 32 95% 44%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 47% 11%;
+
+    --radius: 0.5rem;
+
+    /* Custom tokens for the security dashboard */
+    --critical: 0 84% 60%;
+    --critical-foreground: 0 0% 100%;
+    --critical-bg: 0 84% 97%;
+
+    --high: 38 92% 50%;
+    --high-foreground: 0 0% 100%;
+    --high-bg: 38 92% 95%;
+
+    --medium: 217 91% 60%;
+    --medium-foreground: 0 0% 100%;
+    --medium-bg: 217 91% 97%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --code-bg: 0 0% 100%;
+    --code-line-highlight: 48 96% 89%;
+    --code-keyword: 262 83% 58%;
+    --code-function: 221 83% 53%;
+    --code-string: 142 76% 36%;
+    --code-comment: 215 25% 65%;
+    --code-variable: 222 47% 11%;
+
+    --header-bg: 0 0% 100%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 32 95% 44%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 212 27% 84%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+
+  code,
+  pre {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer components {
+  .code-editor {
+    background: hsl(var(--code-bg));
+    font-family: var(--font-mono);
+  }
+
+  .code-line-number {
+    @apply text-muted-foreground/50 select-none;
+    min-width: 2.5rem;
+  }
+
+  .code-keyword {
+    color: hsl(var(--code-keyword));
+  }
+
+  .code-function {
+    color: hsl(var(--code-function));
+  }
+
+  .code-string {
+    color: hsl(var(--code-string));
+  }
+
+  .code-comment {
+    color: hsl(var(--code-comment));
+  }
+
+  .code-variable {
+    color: hsl(var(--code-variable));
+  }
+
+  .code-highlight-line {
+    background: hsl(var(--code-line-highlight) / 0.15);
+    border-left: 2px solid hsl(var(--code-line-highlight));
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+}
