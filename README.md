@@ -10,11 +10,11 @@
 
 | Feature | Description |
 |---------|-------------|
-| 🔍 **Deep Security Analysis** | Detects OWASP Top 10 vulnerabilities using semantic AI, not regex |
-| ⚡ **Instant Auto-Fix** | Streaming code fixes powered by Groq's LPU™ (Llama 3.3 70B) |
-| 🔐 **JWT Authentication** | Secure backend with Clerk JWT verification |
-| 🚦 **Rate Limiting** | 7 requests/day per user to prevent abuse |
-| 🎨 **Modern UI** | Next.js 14 + Tailwind CSS + Shadcn UI |
+|  **Deep Security Analysis** | Detects OWASP Top 10 vulnerabilities using semantic AI, not regex |
+|  **Instant Auto-Fix** | Streaming code fixes powered by Groq's LPU™ (Llama 3.3 70B) |
+|  **JWT Authentication** | Secure backend with Clerk JWT verification |
+|  **Rate Limiting** | 7 requests/day per user to prevent abuse |
+|  **Modern UI** | Next.js 14 + Tailwind CSS + Shadcn UI |
 
 ---
 
@@ -22,17 +22,17 @@
 
 This project demonstrates advanced **AI Engineering** concepts:
 
-### 🧠 Agentic Architecture
+###  Agentic Architecture
 - **MCP Integration**: Model Context Protocol support for external tool orchestration (Semgrep)
 - **Tool-Calling**: Structured tool definitions for security scanning capabilities
 - **Streaming Responses**: Real-time SSE streaming for code fix generation
 
-### 📝 Prompt Engineering
+###  Prompt Engineering
 - **System Prompts**: Expert cybersecurity researcher persona for vulnerability analysis
 - **Structured Output**: JSON schema enforcement for consistent, parseable security reports
 - **Context Injection**: Dynamic code context insertion for accurate analysis
 
-### 🔧 MCP Server Configuration
+###  MCP Server Configuration
 ```python
 # Example: Semgrep MCP Server Integration
 MCPServerStdio(
