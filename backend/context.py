@@ -1,5 +1,8 @@
 """
-Context and prompts for Groq Responses API with MCP
+Security analysis context and prompt templates.
+
+Provides system instructions and prompt generation for AI-powered
+security vulnerability detection.
 """
 
 SECURITY_RESEARCHER_INSTRUCTIONS = """
@@ -41,6 +44,14 @@ Return your analysis in JSON format:
 }
 """
 
+
 def get_analysis_prompt(code: str) -> str:
-    """Generate the analysis prompt."""
+    """Generate security analysis prompt with code context.
+    
+    Args:
+        code: Python code to analyze
+        
+    Returns:
+        Formatted prompt string for LLM
+    """
     return f"Analyze this Python code for security vulnerabilities:\n\n{code}"

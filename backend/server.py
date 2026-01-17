@@ -1,3 +1,11 @@
+"""
+SecureScript API Server
+
+A FastAPI-based security analysis service that uses AI to detect and fix
+vulnerabilities in Python code. Features JWT authentication, rate limiting,
+and streaming code fixes.
+"""
+
 import os
 import logging
 import json
@@ -19,25 +27,27 @@ import httpx
 
 from context import SECURITY_RESEARCHER_INSTRUCTIONS, get_analysis_prompt
 
-# Load environment variables
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
-# Verify API key is loaded
 print(f"Loading .env from: {env_path}")
 print(f"GROQ_API_KEY loaded: {'Yes' if os.getenv('GROQ_API_KEY') else 'No'}")
 
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize rate limiter
+
 def get_user_email(request: Request) -> str:
-    """
-    Rate limit key function: Use X-User-Email header.
-    Fall back to IP if missing (though verify_authenticated_user will block missing headers).
+    """Extract user email from request headers for rate limiting.
+    
+    Args:
+        request: FastAPI request object
+        
+    Returns:
+        User email from X-User-Email header, or client IP as fallback
     """
     return request.headers.get("X-User-Email") or get_remote_address(request)
+
 
 limiter = Limiter(key_func=get_user_email)
 
@@ -45,10 +55,21 @@ app = FastAPI(title="SecureScript API")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-async def verify_authenticated_user(request: Request):
-    """
-    Verify Clerk JWT token from Authorization header.
-    Fetches Clerk's JWKS to validate the token signature.
+
+async def verify_authenticated_user(request: Request) -> str:
+    """Verify Clerk JWT token and extract user identity.
+    
+    Validates the JWT signature using Clerk's JWKS endpoint to ensure
+    the token was issued by Clerk and hasn't been tampered with.
+    
+    Args:
+        request: FastAPI request object containing Authorization header
+        
+    Returns:
+        User email extracted from verified JWT claims
+        
+    Raises:
+        HTTPException: If token is missing, invalid, or expired
     """
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
@@ -60,18 +81,12 @@ async def verify_authenticated_user(request: Request):
     token = auth_header.split(" ")[1]
     
     try:
-        # Get Clerk Frontend API URL from environment
         clerk_frontend_api = os.getenv("CLERK_FRONTEND_API", "")
         if not clerk_frontend_api:
-            # Fallback: extract from NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format
-            # For production, set CLERK_FRONTEND_API explicitly
             logger.warning("CLERK_FRONTEND_API not set, using permissive mode for development")
-            # In development, we can still verify structure but skip signature
-            # For production, this MUST be set
             if os.getenv("REQUIRE_JWT_VERIFICATION", "true").lower() == "true":
                 raise HTTPException(status_code=500, detail="Server misconfiguration: CLERK_FRONTEND_API not set")
         
-        # Fetch JWKS from Clerk
         jwks_url = f"https://{clerk_frontend_api}/.well-known/jwks.json" if clerk_frontend_api else None
         
         if jwks_url:
@@ -79,7 +94,6 @@ async def verify_authenticated_user(request: Request):
                 jwks_response = await client.get(jwks_url)
                 jwks = jwks_response.json()
             
-            # Get the signing key
             unverified_header = jwt.get_unverified_header(token)
             kid = unverified_header.get("kid")
             
@@ -92,19 +106,16 @@ async def verify_authenticated_user(request: Request):
             if not signing_key:
                 raise HTTPException(status_code=401, detail="Unable to find signing key")
             
-            # Verify and decode the token
             payload = jwt.decode(
                 token,
                 signing_key,
                 algorithms=["RS256"],
-                options={"verify_aud": False}  # Clerk tokens don't always have aud
+                options={"verify_aud": False}
             )
         else:
-            # Development fallback: decode without verification (NOT FOR PRODUCTION)
             payload = jwt.decode(token, options={"verify_signature": False})
             logger.warning("JWT signature verification SKIPPED - development mode only!")
         
-        # Extract user email from claims
         user_email = payload.get("email") or payload.get("primary_email_address") or payload.get("sub")
         
         if not user_email:
@@ -121,7 +132,7 @@ async def verify_authenticated_user(request: Request):
         logger.exception(f"Authentication error: {e}")
         raise HTTPException(status_code=401, detail="Authentication failed.")
 
-# Configure CORS - use env var for production
+
 cors_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001").split(",")
 
 app.add_middleware(
@@ -132,12 +143,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Data Models
+
 class AnalyzeRequest(BaseModel):
+    """Request model for code analysis endpoint."""
     code: str = Field(description="Python code to analyze for security vulnerabilities")
 
 
 class SecurityIssue(BaseModel):
+    """Model representing a single security vulnerability."""
     title: str
     description: str
     code: str
@@ -147,25 +160,32 @@ class SecurityIssue(BaseModel):
 
 
 class SecurityReport(BaseModel):
+    """Model for complete security analysis report."""
     summary: str
     issues: List[SecurityIssue]
 
 
 class FixRequest(BaseModel):
+    """Request model for code fix endpoint."""
     code: str = Field(description="Original vulnerable code")
     issues: List[SecurityIssue] = Field(description="List of issues to fix")
 
 
-# Validation
 def validate_request(request: AnalyzeRequest) -> None:
-    """Validate the analysis request."""
+    """Validate analysis request parameters.
+    
+    Args:
+        request: AnalyzeRequest object to validate
+        
+    Raises:
+        HTTPException: If code is empty, too large, or has syntax errors
+    """
     if not request.code or not request.code.strip():
         raise HTTPException(status_code=400, detail="Code cannot be empty")
     
-    if len(request.code) > 50000:  # 50KB limit
+    if len(request.code) > 50000:
         raise HTTPException(status_code=400, detail="Code is too large. Maximum size is 50KB")
     
-    # Basic Python syntax check
     try:
         compile(request.code, '<string>', 'exec')
     except SyntaxError as e:
@@ -173,13 +193,27 @@ def validate_request(request: AnalyzeRequest) -> None:
 
 
 def check_api_keys() -> None:
-    """Verify required API keys are configured."""
+    """Verify required API keys are configured.
+    
+    Raises:
+        HTTPException: If GROQ_API_KEY is not set
+    """
     if not os.getenv("GROQ_API_KEY"):
         raise HTTPException(status_code=500, detail="Service temporarily unavailable")
 
 
 def verify_api_key(x_api_key: Optional[str] = Header(None)) -> bool:
-    """Verify the client API key (optional for development)."""
+    """Verify client API key if required.
+    
+    Args:
+        x_api_key: API key from X-API-Key header
+        
+    Returns:
+        True if verification passes
+        
+    Raises:
+        HTTPException: If API key is required but missing or invalid
+    """
     if os.getenv("REQUIRE_API_KEY", "false").lower() == "true":
         valid_keys = os.getenv("VALID_API_KEYS", "").split(",")
         if not x_api_key or x_api_key not in valid_keys:
@@ -192,11 +226,19 @@ def verify_api_key(x_api_key: Optional[str] = Header(None)) -> bool:
 
 
 async def run_security_analysis_with_mcp(code: str) -> SecurityReport:
-    """
-    Execute security analysis using Groq Responses API with Remote MCP.
+    """Execute security analysis using Groq LLM.
     
-    This uses Groq's official Responses API which handles tool discovery
-    and orchestration server-side.
+    Analyzes Python code for security vulnerabilities using Llama 3.3 70B
+    with structured JSON output.
+    
+    Args:
+        code: Python code to analyze
+        
+    Returns:
+        SecurityReport containing analysis summary and detected issues
+        
+    Raises:
+        Exception: If analysis fails or response cannot be parsed
     """
     client = AsyncOpenAI(
         api_key=os.getenv("GROQ_API_KEY"),
@@ -204,11 +246,6 @@ async def run_security_analysis_with_mcp(code: str) -> SecurityReport:
     )
     
     try:
-        # Use Groq Responses API with Remote MCP
-        # NOTE: This requires an MCP server exposed via HTTP
-        # For local Semgrep, we'd need to expose it as HTTP server first
-        # For now, we'll use direct chat completions (MCP setup needed separately)
-        
         response = await client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
@@ -226,16 +263,12 @@ async def run_security_analysis_with_mcp(code: str) -> SecurityReport:
             response_format={"type": "json_object"}
         )
         
-        # Parse response
         output_text = response.choices[0].message.content
         logger.info(f"Received response: {len(output_text)} characters")
         
-        # Extract JSON
         try:
-            # First try direct parsing (since json_object mode usually returns raw JSON)
             data = json.loads(output_text)
         except json.JSONDecodeError:
-            # Fallback for markdown blocks if model ignores mode
             import re
             json_match = re.search(r'```json\s*([\s\S]*?)\s*```', output_text)
             if json_match:
@@ -266,10 +299,21 @@ async def analyze_code(
     x_api_key: Optional[str] = Header(None),
     user_email: str = fastapi.Depends(verify_authenticated_user)
 ) -> SecurityReport:
-    """
-    Analyze Python code for security vulnerabilities.
+    """Analyze Python code for security vulnerabilities.
     
-    Rate limit: 7 requests per day per User (Email)
+    Rate limit: 7 requests per day per user
+    
+    Args:
+        request: FastAPI request object
+        analyze_request: Code analysis request
+        x_api_key: Optional API key header
+        user_email: Authenticated user email from JWT
+        
+    Returns:
+        SecurityReport with detected vulnerabilities
+        
+    Raises:
+        HTTPException: If validation fails or analysis errors occur
     """
     import uuid
     
@@ -277,17 +321,12 @@ async def analyze_code(
     logger.info(f"[{request_id}] Analysis request ({len(analyze_request.code)} chars)")
     
     try:
-        # Verify API key
         verify_api_key(x_api_key)
-        
-        # Validate request
         validate_request(analyze_request)
         logger.info(f"[{request_id}] Validation passed")
         
-        # Check internal API keys
         check_api_keys()
         
-        # Run analysis
         logger.info(f"[{request_id}] Starting analysis...")
         report = await run_security_analysis_with_mcp(analyze_request.code)
         logger.info(f"[{request_id}] Complete. Found {len(report.issues)} issues")
@@ -312,28 +351,35 @@ async def fix_security_issues(
     x_api_key: Optional[str] = Header(None),
     user_email: str = fastapi.Depends(verify_authenticated_user)
 ):
-    """
-    Fix security issues with real-time streaming.
-    Returns Server-Sent Events (SSE) stream.
+    """Fix security issues with real-time streaming.
     
-    Rate limit: 7 requests per day per User (Email)
+    Returns Server-Sent Events (SSE) stream with fixed code.
+    Rate limit: 7 requests per day per user
+    
+    Args:
+        request: FastAPI request object
+        fix_request: Code fix request with issues to address
+        x_api_key: Optional API key header
+        user_email: Authenticated user email from JWT
+        
+    Returns:
+        StreamingResponse with SSE events
     """
     import uuid
     
     request_id = str(uuid.uuid4())[:8]
     logger.info(f"[{request_id}] Fix request for {len(fix_request.issues)} issues")
     
-    # Verify API key
     verify_api_key(x_api_key)
     
     async def generate_fix_stream():
+        """Generate SSE stream for code fixes."""
         try:
             client = AsyncOpenAI(
                 api_key=os.getenv("GROQ_API_KEY"),
                 base_url="https://api.groq.com/openai/v1"
             )
             
-            # Create fix prompt
             issues_text = "\n".join([
                 f"{i+1}. {issue.title}: {issue.description}"
                 for i, issue in enumerate(fix_request.issues)
@@ -349,10 +395,8 @@ ORIGINAL CODE:
 
 Return ONLY the fixed code with all security issues resolved. Maintain the original code structure and comments."""
             
-            # Send start event
             yield f"event: start\ndata: {{\"status\": \"Starting fixes...\"}}\n\n"
             
-            # Stream from Groq
             response = await client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": prompt}],
@@ -366,11 +410,9 @@ Return ONLY the fixed code with all security issues resolved. Maintain the origi
                 if chunk.choices[0].delta.content:
                     content = chunk.choices[0].delta.content
                     fixed_code += content
-                    # Send code chunk
                     import json
                     yield f"event: chunk\ndata: {json.dumps({'chunk': content})}\n\n"
             
-            # Send completion
             yield f"event: complete\ndata: {json.dumps({'fixed_code': fixed_code})}\n\n"
             logger.info(f"[{request_id}] Fix complete")
             
@@ -390,7 +432,11 @@ Return ONLY the fixed code with all security issues resolved. Maintain the origi
 
 @app.get("/health")
 async def health():
-    """Health check endpoint."""
+    """Health check endpoint.
+    
+    Returns:
+        Dict with service status
+    """
     return {"status": "ok", "service": "Cybersecurity Analyzer"}
 
 
