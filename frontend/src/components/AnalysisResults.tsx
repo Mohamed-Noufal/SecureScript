@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Shield, AlertTriangle, AlertCircle, Search, Wand2 } from "lucide-react";
 import { AnalysisResultsProps } from "@/types/security";
 import { VulnerabilityCard } from "./VulnerabilityCard";
@@ -10,15 +11,24 @@ export default function AnalysisResults({
   onFix
 }: AnalysisResultsProps) {
 
-  const criticalCount = analysisResults?.issues.filter(i => i.severity === 'critical').length || 0;
-  const highCount = analysisResults?.issues.filter(i => i.severity === 'high').length || 0;
-  const mediumCount = analysisResults?.issues.filter(i => i.severity === 'medium').length || 0;
+  const [ignoredIndices, setIgnoredIndices] = useState<Set<number>>(new Set());
+
+  // Filter out ignored issues
+  const activeIssues = analysisResults?.issues.filter((_, index) => !ignoredIndices.has(index)) || [];
+
+  const criticalCount = activeIssues.filter(i => i.severity === 'critical').length;
+  const highCount = activeIssues.filter(i => i.severity === 'high').length;
+  const mediumCount = activeIssues.filter(i => i.severity === 'medium').length;
 
   const severityCounts = [
     { icon: Shield, label: "Critical", count: criticalCount, bgClass: "bg-critical/15", textClass: "text-critical", visible: criticalCount > 0 },
     { icon: AlertTriangle, label: "High", count: highCount, bgClass: "bg-high/15", textClass: "text-high", visible: highCount > 0 },
     { icon: AlertCircle, label: "Medium", count: mediumCount, bgClass: "bg-medium/15", textClass: "text-medium", visible: mediumCount > 0 },
   ];
+
+  const handleIgnore = (index: number) => {
+    setIgnoredIndices(prev => new Set(prev).add(index));
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -29,7 +39,7 @@ export default function AnalysisResults({
             <h2 className="text-2xl font-semibold text-foreground mb-1">Analysis Results</h2>
             <p className="text-sm text-muted-foreground mb-3">
               {analysisResults
-                ? `Last scanned: just now. Found ${analysisResults.issues.length} vulnerabilities.`
+                ? `Last scanned: just now. Found ${activeIssues.length} vulnerabilities${ignoredIndices.size > 0 ? ` (${ignoredIndices.size} ignored)` : ''}.`
                 : 'Run analysis to see results'
               }
             </p>
@@ -52,11 +62,11 @@ export default function AnalysisResults({
 
           <div className="flex items-center gap-3">
             {/* Fix All Button */}
-            {analysisResults && analysisResults.issues.length > 0 && (
+            {analysisResults && activeIssues.length > 0 && (
               <Button
                 size="sm"
                 className="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground order-1" // Primary color
-                onClick={() => onFix(analysisResults.issues)}
+                onClick={() => onFix(activeIssues)}
                 disabled={isAnalyzing}
               >
                 <Wand2 className="w-4 h-4" />
@@ -97,15 +107,17 @@ export default function AnalysisResults({
         {/* Vulnerability list */}
         {analysisResults && !isAnalyzing && (
           analysisResults.issues.map((issue, index) => (
-            <VulnerabilityCard
-              key={index}
-              severity={issue.severity as "critical" | "high" | "medium"}
-              title={issue.title}
-              description={issue.description}
-              codeSnippet={issue.code}
-              actionLabel="Fix Included in Fix All"
-            // onAction removed to freeze individual buttons
-            />
+            !ignoredIndices.has(index) && (
+              <VulnerabilityCard
+                key={index}
+                severity={issue.severity as "critical" | "high" | "medium"}
+                title={issue.title}
+                description={issue.description}
+                codeSnippet={issue.code}
+                actionLabel="Fix Included in Fix All"
+                onIgnore={() => handleIgnore(index)}
+              />
+            )
           ))
         )}
       </div>

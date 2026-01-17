@@ -2,6 +2,7 @@ import os
 import logging
 import json
 from pathlib import Path
+from functools import lru_cache
 import fastapi
 from fastapi import FastAPI, HTTPException, Header, Request, Depends
 from fastapi.responses import StreamingResponse
@@ -13,6 +14,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from openai import AsyncOpenAI
+import jwt
+import httpx
 
 from context import SECURITY_RESEARCHER_INSTRUCTIONS, get_analysis_prompt
 
@@ -44,17 +47,79 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 async def verify_authenticated_user(request: Request):
     """
-    Strictly enforce that a user email is present.
-    In a real app, we would verify the JWT token here.
-    For this implementation, we enforce the header presence as a proxy.
+    Verify Clerk JWT token from Authorization header.
+    Fetches Clerk's JWKS to validate the token signature.
     """
-    user_email = request.headers.get("X-User-Email")
-    if not user_email:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(
-            status_code=401, 
+            status_code=401,
             detail="Authentication required. Please sign in."
         )
-    return user_email
+    
+    token = auth_header.split(" ")[1]
+    
+    try:
+        # Get Clerk Frontend API URL from environment
+        clerk_frontend_api = os.getenv("CLERK_FRONTEND_API", "")
+        if not clerk_frontend_api:
+            # Fallback: extract from NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format
+            # For production, set CLERK_FRONTEND_API explicitly
+            logger.warning("CLERK_FRONTEND_API not set, using permissive mode for development")
+            # In development, we can still verify structure but skip signature
+            # For production, this MUST be set
+            if os.getenv("REQUIRE_JWT_VERIFICATION", "true").lower() == "true":
+                raise HTTPException(status_code=500, detail="Server misconfiguration: CLERK_FRONTEND_API not set")
+        
+        # Fetch JWKS from Clerk
+        jwks_url = f"https://{clerk_frontend_api}/.well-known/jwks.json" if clerk_frontend_api else None
+        
+        if jwks_url:
+            async with httpx.AsyncClient() as client:
+                jwks_response = await client.get(jwks_url)
+                jwks = jwks_response.json()
+            
+            # Get the signing key
+            unverified_header = jwt.get_unverified_header(token)
+            kid = unverified_header.get("kid")
+            
+            signing_key = None
+            for key in jwks.get("keys", []):
+                if key.get("kid") == kid:
+                    signing_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key))
+                    break
+            
+            if not signing_key:
+                raise HTTPException(status_code=401, detail="Unable to find signing key")
+            
+            # Verify and decode the token
+            payload = jwt.decode(
+                token,
+                signing_key,
+                algorithms=["RS256"],
+                options={"verify_aud": False}  # Clerk tokens don't always have aud
+            )
+        else:
+            # Development fallback: decode without verification (NOT FOR PRODUCTION)
+            payload = jwt.decode(token, options={"verify_signature": False})
+            logger.warning("JWT signature verification SKIPPED - development mode only!")
+        
+        # Extract user email from claims
+        user_email = payload.get("email") or payload.get("primary_email_address") or payload.get("sub")
+        
+        if not user_email:
+            raise HTTPException(status_code=401, detail="Invalid token: no user identifier")
+        
+        return user_email
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired. Please sign in again.")
+    except jwt.InvalidTokenError as e:
+        logger.error(f"JWT validation failed: {e}")
+        raise HTTPException(status_code=401, detail="Invalid authentication token.")
+    except Exception as e:
+        logger.exception(f"Authentication error: {e}")
+        raise HTTPException(status_code=401, detail="Authentication failed.")
 
 # Configure CORS - use env var for production
 cors_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001").split(",")

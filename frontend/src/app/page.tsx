@@ -27,18 +27,73 @@ export default function Home() {
 
   if (!isSignedIn) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-card border rounded-xl p-8 text-center shadow-lg">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <ShieldAlert className="w-8 h-8 text-primary" />
+      <div className="h-[calc(100vh-4rem)] flex items-center justify-center p-6 bg-white relative overflow-hidden">
+        {/* Aurora Background Effects */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          {/* Top Right - Soft Blue */}
+          <div className="absolute -top-[10%] -right-[10%] w-[50%] h-[50%] rounded-full bg-blue-100 blur-[120px] opacity-60 animate-pulse" />
+
+          {/* Bottom Left - Soft Purple */}
+          <div className="absolute -bottom-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-purple-100 blur-[120px] opacity-60 animate-pulse delay-1000" />
+
+          {/* Center - Very Subtle Pink */}
+          <div className="absolute top-[30%] left-[30%] w-[40%] h-[40%] rounded-full bg-pink-50 blur-[100px] opacity-40 mix-blend-multiply" />
+        </div>
+
+        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
+
+          {/* Left Column: Marketing / Value Prop */}
+          <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
+            <div className="space-y-4">
+              <h1 className="text-5xl font-extrabold tracking-tight lg:text-6xl text-foreground">
+                Cut Security Risks <span className="text-primary">Instantly.</span>
+              </h1>
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                Supercharge your code with AI-powered vulnerability detection. Fix security holes in seconds, not days.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground">
+              <div className="flex -space-x-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-background" />
+                <div className="w-8 h-8 rounded-full bg-purple-500 border-2 border-background" />
+                <div className="w-8 h-8 rounded-full bg-green-500 border-2 border-background" />
+              </div>
+              <span>Ready to secure your scripts? Let's find every vulnerability.</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Authentication Required</h1>
-          <p className="text-muted-foreground mb-6">
-            You must be signed in to use SecureScript. Access is restricted to authorized security personnel.
-          </p>
-          <div className="flex justify-center">
-            {/* The Header component handles the actual SignIn button logic via Clerk Proivder */}
-            <p className="text-sm font-medium text-primary">Please use the "Sign In" button in the top right.</p>
+
+          {/* Right Column: Authentication Box */}
+          <div className="flex justify-center md:justify-end animate-in fade-in slide-in-from-right-4 duration-700 delay-200">
+            <div className="w-full max-w-sm bg-card border rounded-2xl p-8 shadow-2xl">
+              <div className="text-center mb-8">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <ShieldAlert className="w-6 h-6 text-primary" />
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight">Welcome Back to SecureScript</h2>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Sign in to access your private security dashboard.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {/* The Header component handles the actual SignIn button logic via Clerk Provider. 
+                     We are directing them visually to the top right or just indicating action here.
+                     Actually, with Clerk we can embed a SignIn component here if we installed @clerk/nextjs completely, 
+                     but for now we'll stick to the "Gate" message but styled better.
+                 */}
+                <div className="p-4 bg-muted/50 rounded-lg border border-dashed border-border text-center">
+                  <p className="text-sm font-medium">
+                    Please use the <span className="text-primary font-bold">Sign In</span> button
+                    <br />in the navigation bar to continue.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t text-center text-xs text-muted-foreground">
+                By continuing, you agree to SecureScript's <a href="#" className="underline hover:text-primary">Terms of Service</a>.
+              </div>
+            </div>
           </div>
         </div>
       </div>
