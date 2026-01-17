@@ -1,101 +1,92 @@
-# 🛡️ SecureScript (Code Safety Analyzer)
+# 🛡️ SecureScript
 
-**SecureScript** is an advanced, AI-powered security analysis tool designed to identify and automatically remediate vulnerabilities in Python code. Built for speed and accuracy, it leverages **Groq's LPU™ Inference Engine** (Llama 3.3) to provide near-instant security audits and fixes.
+> **AI-powered security analysis for Python code. Find vulnerabilities and fix them instantly.**
 
-![CodeSentinel Preview](assets/codesentinel-preview.png)
+![SecureScript Landing Page](assets/securescript-hero.png)
 
-## 🚀 Key Features
+---
 
-*   **🛡️ Deep Security Analysis**: Detects OWASP Top 10 vulnerabilities (SQLi, XSS, Deserialization, Hardcoded Secrets) using semantic understanding, not just regex.
-*   **⚡ Streaming Auto-Fix**: Instantly generates secure patches for identified issues.
-*   **🔐 Strict Access Control**: Mandatory authentication via Clerk prevents unauthorized usage.
-*   **🚦 Intelligent Rate Limiting**: Enforces a strict quota of **7 requests per user per day** to prevent abuse and manage LLM costs.
-*   **🎨 Premium UI**: A modern, dark-mode/light-mode compatible interface built with Next.js and Shadcn UI.
+## ✨ Features
 
-## 🛠️ Technology Stack
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Deep Security Analysis** | Detects OWASP Top 10 vulnerabilities using semantic AI, not regex |
+| ⚡ **Instant Auto-Fix** | Streaming code fixes powered by Groq's LPU™ (Llama 3.3 70B) |
+| 🔐 **JWT Authentication** | Secure backend with Clerk JWT verification |
+| 🚦 **Rate Limiting** | 7 requests/day per user to prevent abuse |
+| 🎨 **Modern UI** | Next.js 14 + Tailwind CSS + Shadcn UI |
+
+---
+
+## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Shadcn UI](https://ui.shadcn.com/)
-- **Auth**: [Clerk](https://clerk.com/)
-- **State**: React Hooks (Strict Mode)
+- **Next.js 14** (App Router)
+- **Tailwind CSS** & **Shadcn UI**
+- **Clerk** (Authentication)
 
 ### Backend
-- **Framework**: [FastAPI](https://fastapi.tiangolo.com/)
-- **AI Engine**: [Groq](https://groq.com/) (Llama 3.3 70B Versatile)
-- **Rate Limiting**: [SlowAPI](https://github.com/laurentS/slowapi) (In-memory, email-based)
-- **Validation**: Pydantic
+- **FastAPI** (Python)
+- **Groq** (Llama 3.3 70B Versatile)
+- **SlowAPI** (Rate Limiting)
+- **PyJWT** (JWT Verification)
 
-## 🏁 Getting Started
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- Python 3.10+
-- **Groq API Key**: Get one at [console.groq.com](https://console.groq.com)
-- **Clerk Keys**: Create an application at [dashboard.clerk.com](https://dashboard.clerk.com)
+- Node.js 18+ & Python 3.12+
+- [Groq API Key](https://console.groq.com)
+- [Clerk Account](https://dashboard.clerk.com)
 
-### 1. Backend Setup
-
+### Backend
 ```bash
 cd backend
-
-# Create & activate virtual environment
-python -m venv venv
-# Windows: .\venv\Scripts\activate
-# Mac/Linux: source venv/bin/activate
-
-# Install dependencies (using uv for speed)
 uv sync
-# OR
-pip install -r requirements.txt
-
-# Configure Environment
-# Create .env file with:
-GROQ_API_KEY=gsk_your_key_here
-ALLOWED_ORIGINS=http://localhost:3000
-
-# Start Server
+# Add to .env:
+# GROQ_API_KEY=gsk_your_key
+# CLERK_FRONTEND_API=your-app.clerk.accounts.dev
+# REQUIRE_JWT_VERIFICATION=true
 uv run server.py
-# Server runs at http://localhost:8000
 ```
 
-### 2. Frontend Setup
-
+### Frontend
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Configure Environment
-# Create .env.local file with:
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Start App
+# Add to .env.local:
+# NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+# CLERK_SECRET_KEY=sk_test_...
 npm run dev
-# App runs at http://localhost:3000
 ```
 
-## 🧪 Usage Guide
+---
 
-1.  **Sign In**: You must log in via Clerk to access the workspace.
-2.  **Upload Code**: Paste your Python code or click "Open" to upload a `.py` file.
-3.  **Run Analysis**:
-    *   Click the **Run Analysis** button.
-    *   The backend scans your code for vulnerabilities.
-4.  **Fix Issues**:
-    *   Review the cards on the right.
-    *   Click **Fix All Issues** (Blue button) to stream a complete rewrite of your code with fixes applied.
-    *   *Note*: You are limited to 7 analyses/fixes per day.
+## 🧪 How to Use
 
-## 🛡️ Security
+1. **Sign In** with Clerk
+2. **Upload** a Python file or paste code
+3. **Analyze** to detect vulnerabilities
+4. **Fix All** to stream secure code
 
-*   **Secrets**: All API keys are stored in `.env` files (git-ignored).
-*   **Auth**: Requests to the backend require a valid `X-User-Email` header, verified against the session.
-*   **XSS Protection**: React automatically escapes content rendering.
+---
 
-## 🤝 Contributing
+## 🔒 Security
 
-Contributions are welcome! Please fork the repository and submit a pull request.
+- ✅ JWT token verification (Clerk JWKS)
+- ✅ Rate limiting per user
+- ✅ CORS restricted to allowed origins
+- ✅ No secrets in version control
+
+---
+
+## 📄 License
+
+MIT License - Feel free to use for learning and personal projects.
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/Mohamed-Noufal">Mohamed Noufal</a>
+</p>
