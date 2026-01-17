@@ -18,6 +18,31 @@
 
 ---
 
+## 🤖 AI Engineering Highlights
+
+This project demonstrates advanced **AI Engineering** concepts:
+
+### 🧠 Agentic Architecture
+- **MCP Integration**: Model Context Protocol support for external tool orchestration (Semgrep)
+- **Tool-Calling**: Structured tool definitions for security scanning capabilities
+- **Streaming Responses**: Real-time SSE streaming for code fix generation
+
+### 📝 Prompt Engineering
+- **System Prompts**: Expert cybersecurity researcher persona for vulnerability analysis
+- **Structured Output**: JSON schema enforcement for consistent, parseable security reports
+- **Context Injection**: Dynamic code context insertion for accurate analysis
+
+### 🔧 MCP Server Configuration
+```python
+# Example: Semgrep MCP Server Integration
+MCPServerStdio(
+    params={"command": "uvx", "args": ["semgrep-mcp"]},
+    tool_filter=create_static_tool_filter(allowed_tool_names=["semgrep_scan"]),
+)
+```
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -28,6 +53,7 @@
 ### Backend
 - **FastAPI** (Python)
 - **Groq** (Llama 3.3 70B Versatile)
+- **OpenAI Agents SDK** (MCP Integration)
 - **SlowAPI** (Rate Limiting)
 - **PyJWT** (JWT Verification)
 
@@ -44,10 +70,12 @@
 ```bash
 cd backend
 uv sync
+
 # Add to .env:
-# GROQ_API_KEY=gsk_your_key
-# CLERK_FRONTEND_API=your-app.clerk.accounts.dev
-# REQUIRE_JWT_VERIFICATION=true
+GROQ_API_KEY=gsk_your_key
+CLERK_FRONTEND_API=your-app.clerk.accounts.dev
+REQUIRE_JWT_VERIFICATION=true
+
 uv run server.py
 ```
 
@@ -55,9 +83,11 @@ uv run server.py
 ```bash
 cd frontend
 npm install
+
 # Add to .env.local:
-# NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-# CLERK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+
 npm run dev
 ```
 
@@ -88,5 +118,5 @@ MIT License - Feel free to use for learning and personal projects.
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/Mohamed-Noufal">Mohamed Noufal</a>
+  Built by <a href="https://github.com/Mohamed-Noufal">Mohamed Noufal</a> • AI Engineer
 </p>
