@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
-import { AnalysisResponse } from '@/types/security';
+import { AnalysisResponse, SecurityIssue } from '@/types/security';
 import CodeInput from '@/components/CodeInput';
 import AnalysisResults from '@/components/AnalysisResults';
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button"; // Unused import removed
 import { ShieldAlert } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -59,7 +59,7 @@ export default function Home() {
                 <div className="w-8 h-8 rounded-full bg-purple-500 border-2 border-background" />
                 <div className="w-8 h-8 rounded-full bg-green-500 border-2 border-background" />
               </div>
-              <span>Ready to secure your scripts? Let's find every vulnerability.</span>
+              <span>Ready to secure your scripts? Let&apos;s find every vulnerability.</span>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ export default function Home() {
               </div>
 
               <div className="mt-8 pt-6 border-t text-center text-xs text-muted-foreground">
-                By continuing, you agree to SecureScript's <a href="#" className="underline hover:text-primary">Terms of Service</a>.
+                By continuing, you agree to SecureScript&apos;s <a href="#" className="underline hover:text-primary">Terms of Service</a>.
               </div>
             </div>
           </div>
@@ -108,6 +108,7 @@ export default function Home() {
       reader.onload = (e) => {
         const content = e.target?.result as string;
         setCodeContent(content);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).originalCode = content;
         setAnalysisResults(null);
         setError(null);
@@ -150,7 +151,7 @@ export default function Home() {
 
   // ... existing handlers ...
 
-  const handleFixIssue = async (issues: any | any[]) => {
+  const handleFixIssue = async (issues: SecurityIssue | SecurityIssue[]) => {
     if (!codeContent) return;
     setIsFixing(true);
 

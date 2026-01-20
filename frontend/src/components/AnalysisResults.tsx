@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, AlertTriangle, AlertCircle, Search, Wand2 } from "lucide-react";
+import { Shield, AlertTriangle, AlertCircle, Wand2 } from "lucide-react";
 import { AnalysisResultsProps } from "@/types/security";
 import { VulnerabilityCard } from "./VulnerabilityCard";
 import { Button } from "@/components/ui/button";
@@ -66,7 +66,7 @@ export default function AnalysisResults({
               <Button
                 size="sm"
                 className="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground order-1" // Primary color
-                onClick={() => onFix(activeIssues)}
+                onClick={() => onFix?.(activeIssues)}
                 disabled={isAnalyzing}
               >
                 <Wand2 className="w-4 h-4" />
