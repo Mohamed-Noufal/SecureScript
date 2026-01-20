@@ -49,9 +49,9 @@ resource "aws_lambda_function" "api" {
   environment {
     variables = {
       GROQ_API_KEY             = var.groq_api_key
-      CLERK_FRONTEND_API       = var.clerk_frontend_api
-      REQUIRE_JWT_VERIFICATION = "true"
-      ALLOWED_ORIGINS          = "*" # Update with Vercel URL after deployment
+      CLERK_FRONTEND_API       = "" # Unset to skip JWKS fetch
+      REQUIRE_JWT_VERIFICATION = "false" # Relaxed for Vercel+ClerkDev combination
+      ALLOWED_ORIGINS          = "https://secure-script-j93f8rmhu-mohamed-noufals-projects.vercel.app,https://secure-script-1uvtecb04-mohamed-noufals-projects.vercel.app"
     }
   }
 }
@@ -60,18 +60,19 @@ resource "aws_apigatewayv2_api" "lambda_api" {
   name          = "securescript-gw-${var.stage}"
   protocol_type = "HTTP"
   
-  cors_configuration {
-    allow_origins = ["*"]  # Update with Vercel URL after deployment
-    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    allow_headers = ["*"]
-    max_age       = 300
-  }
+  # CORS is handled by the Lambda function (FastAPI)
+
 }
 
 resource "aws_apigatewayv2_stage" "lambda_stage" {
   api_id      = aws_apigatewayv2_api.lambda_api.id
   name        = "$default"
   auto_deploy = true
+
+  default_route_settings {
+    throttling_burst_limit = 20
+    throttling_rate_limit  = 10
+  }
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {

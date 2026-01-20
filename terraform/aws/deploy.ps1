@@ -95,6 +95,5 @@ Write-Host ""
 Write-Host "🎉 Backend is now live!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
-Write-Host "1. Copy the API Gateway URL above" -ForegroundColor White
-Write-Host "2. Deploy frontend to Vercel with this API URL" -ForegroundColor White
-Write-Host "3. Update Lambda CORS with Vercel URL" -ForegroundColor White
+Write-Host "1. Update frontend env vars with the API Gateway URL above." -ForegroundColor White
+Write-Host "2. Test the connection." -ForegroundColor White
