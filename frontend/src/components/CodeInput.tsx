@@ -1,4 +1,4 @@
-import { X, Save, Play, Check, Upload } from "lucide-react";
+import { X, Play, Check, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CodeInputProps } from "@/types/security";
 
@@ -93,59 +93,7 @@ export default function CodeInput({
               const num = i + 1;
               const isHighlight = line.includes("api_key") || line.includes("secret") || line.includes("password");
 
-              // Basic syntax highlighting helper
-              const highlightSyntax = (text: string) => {
-                const parts: React.ReactNode[] = [];
-                let currentText = text;
 
-                // 1. Comments
-                const commentIdx = currentText.indexOf('#');
-                let comment = '';
-                if (commentIdx !== -1) {
-                  comment = currentText.slice(commentIdx);
-                  currentText = currentText.slice(0, commentIdx);
-                }
-
-                // 2. Split by common delimiters to finding tokens
-                // This is a very simple tokenizer for visual effect
-                const tokens = currentText.split(/(\s+|[(){}[\]=,.'"*])/);
-
-                tokens.forEach((token, idx) => {
-                  let className = "text-foreground"; // default variable color
-
-                  if (['def', 'class', 'import', 'from', 'return', 'if', 'else', 'try', 'except', 'print', 'in', 'as'].includes(token)) {
-                    className = "code-keyword font-semibold";
-                  } else if (['True', 'False', 'None'].includes(token)) {
-                    className = "code-keyword italic";
-                  } else if (token.match(/^[0-9]+$/)) {
-                    className = "text-[#098658]"; // Number color green
-                  } else if (token.startsWith('"') || token.startsWith("'")) {
-                    className = "code-string";
-                  } else if (token.match(/^[A-Z][a-zA-Z0-9_]*$/) && token !== token.toUpperCase()) {
-                    // PascalCase often classes in Python
-                    className = "text-[#267f99]";
-                  } else if (token.match(/^[a-z_][a-z0-9_]*$/) && i > 0 && lines[i].trim().startsWith('def ')) {
-                    // Function definition name heuristic (imperfect but helps)
-                    className = "code-function";
-                  }
-
-                  // Strings logic needs better handling (this splits quotes), so manual override for demo:
-                  if (token.startsWith('f"') || token.startsWith('"') || token.startsWith("'")) {
-                    className = "code-string";
-                  }
-
-                  // Fix for partial strings split by tokenizer... skipping complex logic for simplicity
-                  // Instead, let's just color specific known tokens for the demo
-
-                  parts.push(<span key={idx} className={className}>{token}</span>);
-                });
-
-                if (comment) {
-                  parts.push(<span key="comment" className="code-comment">{comment}</span>);
-                }
-
-                return parts;
-              };
 
               // Better simple regex based highlighter for entire line
               const renderHighlightedLine = (text: string) => {
@@ -164,7 +112,7 @@ export default function CodeInput({
                   { type: 'number', regex: /\b\d+\b/ },
                 ];
 
-                let result = [];
+                const result = [];
                 let remaining = text;
                 let key = 0;
 

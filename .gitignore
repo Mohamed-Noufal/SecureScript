@@ -221,3 +221,7 @@ terraform.tfstate.d/
 # Variable files that might contain secrets
 *.auto.tfvars
 terraform.tfvars
+
+# Deployment packages
+backend.zip
+*.zip

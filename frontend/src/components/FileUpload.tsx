@@ -2,7 +2,6 @@ import { Upload, Zap } from 'lucide-react';
 import { FileUploadProps } from '@/types/security';
 
 export default function FileUpload({
-  fileName,
   onFileUpload,
   onAnalyzeCode,
   isAnalyzing,

@@ -1,12 +1,12 @@
 "use client";
 
-import { Search, Bell, ChevronDown, Shield } from "lucide-react";
+import { Search, Bell, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Unused import removed
 import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 
-const navItems = ["Dashboard", "Projects", "Reports", "Rules", "Settings"];
+// const navItems = ["Dashboard", "Projects", "Reports", "Rules", "Settings"]; // Unused variable removed
 
 import { useUser } from "@clerk/nextjs";
 
