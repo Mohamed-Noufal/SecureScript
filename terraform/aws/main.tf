@@ -51,7 +51,7 @@ resource "aws_lambda_function" "api" {
       GROQ_API_KEY             = var.groq_api_key
       CLERK_FRONTEND_API       = "" # Unset to skip JWKS fetch
       REQUIRE_JWT_VERIFICATION = "false" # Relaxed for Vercel+ClerkDev combination
-      ALLOWED_ORIGINS          = "https://secure-script-j93f8rmhu-mohamed-noufals-projects.vercel.app,https://secure-script-1uvtecb04-mohamed-noufals-projects.vercel.app"
+      ALLOWED_ORIGINS          = "https://secure-script-alpha.vercel.app"
     }
   }
 }

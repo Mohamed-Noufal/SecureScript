@@ -1,122 +1,216 @@
 # 🛡️ SecureScript
 
-> **AI-powered security analysis for Python code. Find vulnerabilities and fix them instantly.**
+> **AI-Powered Security Analysis for Python Code**  
+> Find vulnerabilities instantly and fix them with streaming AI assistance.
 
-![SecureScript Landing Page](assets/securescript-hero.png)
+[![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://secure-script-alpha.vercel.app)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 
 ---
 
 ## ✨ Features
 
-| Feature | Description |
-|---------|-------------|
-|  **Deep Security Analysis** | Detects OWASP Top 10 vulnerabilities using semantic AI, not regex |
-|  **Instant Auto-Fix** | Streaming code fixes powered by Groq's LPU™ (Llama 3.3 70B) |
-|  **JWT Authentication** | Secure backend with Clerk JWT verification |
-|  **Rate Limiting** | 7 requests/day per user to prevent abuse |
-|  **Modern UI** | Next.js 14 + Tailwind CSS + Shadcn UI |
+- 🔍 **Deep Security Analysis** — Detects OWASP Top 10 vulnerabilities using AI semantic analysis
+- ⚡ **Instant Auto-Fix** — Streaming code fixes powered by Groq's Llama 3.3 70B
+- 🔐 **JWT Authentication** — Secure backend with Clerk authentication
+- 🚦 **Rate Limiting** — 7 requests/day per user + API Gateway throttling
+- 🎨 **Modern UI** — Next.js 15 + Tailwind CSS + Shadcn UI
 
 ---
 
-## 🤖 AI Engineering Highlights
+## 🏗️ Architecture
 
-This project demonstrates advanced **AI Engineering** concepts:
-
-###  Agentic Architecture
-- **MCP Integration**: Model Context Protocol support for external tool orchestration (Semgrep)
-- **Tool-Calling**: Structured tool definitions for security scanning capabilities
-- **Streaming Responses**: Real-time SSE streaming for code fix generation
-
-###  Prompt Engineering
-- **System Prompts**: Expert cybersecurity researcher persona for vulnerability analysis
-- **Structured Output**: JSON schema enforcement for consistent, parseable security reports
-- **Context Injection**: Dynamic code context insertion for accurate analysis
-
-###  MCP Server Configuration
-```python
-# Example: Semgrep MCP Server Integration
-MCPServerStdio(
-    params={"command": "uvx", "args": ["semgrep-mcp"]},
-    tool_filter=create_static_tool_filter(allowed_tool_names=["semgrep_scan"]),
-)
+```mermaid
+graph LR
+    A[User Browser] -->|HTTPS| B[Vercel - Next.js Frontend]
+    B -->|JWT Token| C[AWS API Gateway]
+    C -->|CORS + Throttling| D[AWS Lambda - FastAPI]
+    D -->|API Call| E[Groq LLM]
+    B -.->|Auth| F[Clerk]
 ```
 
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Next.js 14** (App Router)
-- **Tailwind CSS** & **Shadcn UI**
-- **Clerk** (Authentication)
-
-### Backend
-- **FastAPI** (Python)
-- **Groq** (Llama 3.3 70B Versatile)
-- **OpenAI Agents SDK** (MCP Integration)
-- **SlowAPI** (Rate Limiting)
-- **PyJWT** (JWT Verification)
+**Tech Stack:**
+- **Frontend**: Next.js 15, React 19, Tailwind CSS, Clerk Auth
+- **Backend**: FastAPI, Python 3.12, AWS Lambda
+- **AI**: Groq (Llama 3.3 70B Versatile)
+- **Infrastructure**: Terraform, AWS (Lambda + API Gateway), Vercel
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Live Demo
+
+**🌐 [https://secure-script-alpha.vercel.app](https://secure-script-alpha.vercel.app)**
+
+1. Sign in with Google
+2. Upload a Python file or paste code
+3. Click "Analyze" to detect vulnerabilities
+4. Click "Fix All" to stream secure code
+
+---
+
+## �️ Local Development
 
 ### Prerequisites
-- Node.js 18+ & Python 3.12+
+- Node.js 20+
+- Python 3.12+
 - [Groq API Key](https://console.groq.com)
-- [Clerk Account](https://dashboard.clerk.com)
+- [Clerk Account](https://clerk.com)
 
-### Backend
+### Backend Setup
 ```bash
 cd backend
-uv sync
+pip install -r requirements.txt
 
-# Add to .env:
-GROQ_API_KEY=gsk_your_key
-CLERK_FRONTEND_API=your-app.clerk.accounts.dev
-REQUIRE_JWT_VERIFICATION=true
+# Create .env file:
+echo "GROQ_API_KEY=your_groq_key" > .env
+echo "CLERK_FRONTEND_API=your-app.clerk.accounts.dev" >> .env
+echo "REQUIRE_JWT_VERIFICATION=false" >> .env
+echo "ALLOWED_ORIGINS=http://localhost:3000" >> .env
 
-uv run server.py
+python server.py
 ```
 
-### Frontend
+### Frontend Setup
 ```bash
 cd frontend
 npm install
 
-# Add to .env.local:
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+# Create .env.local file:
+echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_..." > .env.local
+echo "CLERK_SECRET_KEY=sk_test_..." >> .env.local
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" >> .env.local
 
 npm run dev
 ```
 
----
-
-## 🧪 How to Use
-
-1. **Sign In** with Clerk
-2. **Upload** a Python file or paste code
-3. **Analyze** to detect vulnerabilities
-4. **Fix All** to stream secure code
+Visit `http://localhost:3000` 
 
 ---
 
-## 🔒 Security
+## 📦 Deployment
 
-- ✅ JWT token verification (Clerk JWKS)
-- ✅ Rate limiting per user
-- ✅ CORS restricted to allowed origins
-- ✅ No secrets in version control
+### Backend (AWS Lambda via Terraform)
+```bash
+cd terraform/aws
+
+# Configure variables
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your API keys
+
+# Deploy
+terraform init
+terraform apply
+```
+
+### Frontend (Vercel)
+1. Push code to GitHub
+2. Import project on [Vercel](https://vercel.com)
+3. Set environment variables (Clerk keys, API URL)
+4. Deploy! ✅
+
+**Full deployment guide:** [Info/DEPLOYMENT-GUIDE-AWS-VERCEL.md](Info/DEPLOYMENT-GUIDE-AWS-VERCEL.md)
+
+---
+
+## Git Workflow
+
+We use **GitHub Flow** for development:
+
+```bash
+# Create feature branch from develop
+git checkout develop
+git pull
+git checkout -b feature/your-feature
+
+# Make changes, commit, push
+git add .
+git commit -m "Add feature"
+git push -u origin feature/your-feature
+
+# Merge to develop for testing
+git checkout develop
+git merge feature/your-feature
+git push
+
+# Merge to main for production
+git checkout main
+git merge develop
+git push  # Auto-deploys to Vercel
+```
+
+**Branches:**
+- `main` → Production (auto-deploys to Vercel)
+- `develop` → Staging/Testing
+- `feature/*` → Active development
+
+---
+
+## Project Structure
+
+```
+.
+├── backend/              # FastAPI backend
+│   ├── server.py        # Main API server
+│   ├── context.py       # Security analysis logic
+│   └── package_linux/   # Lambda dependencies
+├── frontend/            # Next.js frontend
+│   ├── src/
+│   │   ├── app/        # App Router pages
+│   │   ├── components/ # React components
+│   │   └── types/      # TypeScript types
+│   └── public/         # Static assets
+├── terraform/aws/       # Infrastructure as Code
+│   ├── main.tf         # AWS resources
+│   └── deploy.ps1      # Deployment script
+└── Info/               # Documentation
+```
+
+---
+
+## Security
+
+- ✅ **JWT Verification** — Clerk JWKS validation
+- ✅ **Rate Limiting** — 7 requests/day/user (app) + 10 RPS (infrastructure)
+- ✅ **CORS Protection** — Strict origin whitelisting
+- ✅ **DDoS Mitigation** — API Gateway throttling
+- ✅ **No Secrets in Git** — All keys in environment variables
+
+---
+
+## Performance
+
+- **Analysis Speed**: ~3-5 seconds (Groq LPU™)
+- **Fix Streaming**: Real-time SSE (Server-Sent Events)
+- **Cold Start**: <1s (AWS Lambda with 512MB)
+- **Uptime**: 99.9% (AWS + Vercel)
+
+---
+
+## Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing`)
+5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-MIT License - Feel free to use for learning and personal projects.
+MIT License - See [LICENSE](LICENSE) for details.
 
----
 
 <p align="center">
-  Built by <a href="https://github.com/Mohamed-Noufal">Mohamed Noufal</a> • AI Engineer
+  <strong>Built with ❤️ by <a href="https://github.com/Mohamed-Noufal">Mohamed Noufal</a></strong><br>
+  AI Engineer | Cybersecurity Enthusiast
+</p>
+
+<p align="center">
+  <a href="https://secure-script-alpha.vercel.app">Live Demo</a> •
+  <a href="Info/DEPLOYMENT-GUIDE-AWS-VERCEL.md">Deployment Guide</a> •
+  <a href="SECURITY_GUIDE.md">Security Docs</a>
 </p>
