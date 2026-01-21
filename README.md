@@ -205,7 +205,7 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 
 <p align="center">
-  <strong>Built with ❤️ by <a href="https://github.com/Mohamed-Noufal">Mohamed Noufal</a></strong><br>
+  <strong>Built by <a href="https://github.com/Mohamed-Noufal">Mohamed Noufal</a></strong><br>
   AI Engineer | Cybersecurity Enthusiast
 </p>
 
