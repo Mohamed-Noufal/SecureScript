@@ -18,7 +18,7 @@
 - 🚦 **Rate Limiting** — 7 requests/day per user + API Gateway throttling
 - 🎨 **Modern UI** — Next.js 15 + Tailwind CSS + Shadcn UI
 
----
+--- 
 
 ## 🏗️ Architecture
 
