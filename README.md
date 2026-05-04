@@ -1,4 +1,4 @@
-# 🛡️ SecureScript    
+# 🛡️ SecureScript     
        
 > **AI-Powered Security Analysis for Python Code**      
 > Find vulnerabilities instantly and fix them with streaming AI assistance. 
