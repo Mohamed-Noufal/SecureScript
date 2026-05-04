@@ -2,7 +2,7 @@
        
 > **AI-Powered Security Analysis for Python Code**      
 > Find vulnerabilities instantly and fix them with streaming AI assistance. 
-            
+             
 [![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://secure-script-alpha.vercel.app)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
